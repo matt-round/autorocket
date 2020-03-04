@@ -54,3 +54,6 @@ compile_commands.json
 
 # rslr
 .idea
+
+# mac
+.DS_Store
