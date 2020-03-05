@@ -9,6 +9,7 @@
 #include <QWidget>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include "Rocket.h"
 
 
 class MainWindow : public QMainWindow {
@@ -20,6 +21,8 @@ public:
 private:
     QGraphicsScene *m_scene;
     QGraphicsView *m_graphicsView;
+    Rocket *m_rocket;
+    void m_stepUpGraphicsView();
 };
 
 
