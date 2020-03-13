@@ -12,10 +12,14 @@
 
 class Rocket : public PhysicsMappingGraphicsItem {
 public:
+    Rocket();
     QRectF boundingRect() const override;
     void paint(QPainter *painter,
             const QStyleOptionGraphicsItem *option,
             QWidget *widget) override;
+    void moveRocket(std::array<float, 2> position, int MPR);
+    void setAngle(float angle, int MPR);
+
 protected:
     void advance(int phase) override;
 };

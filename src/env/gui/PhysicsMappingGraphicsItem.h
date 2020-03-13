@@ -7,9 +7,17 @@
 
 
 #include <QGraphicsItem>
+#include <vector>
+#include <b2_math.h>
 
 class PhysicsMappingGraphicsItem : public QGraphicsItem {
+public:
+    void loadBody(const std::vector<b2Vec2>&body);
+    void loadBody(const std::vector<b2Vec2>&body, int scalingFactor);
 
+protected:
+    std::vector<QPointF> m_body;
+    int m_MPR;
 };
 
 
