@@ -40,7 +40,7 @@ int randomInt(int min, int max) {
 }
 
 int main(int argc, char *argv[]) {
-    constexpr int discreteOSSize {120};
+    constexpr int discreteOSSize {60};
     constexpr bool wind = false;
     Simulation sim = Simulation(-10.0f, wind);
     auto interface = Interface(sim, discreteOSSize);
