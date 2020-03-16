@@ -87,7 +87,7 @@ void learn(
     constexpr float learningRate {0.1f};
     constexpr float discount {0.95f};
     constexpr int episodes {10000};
-    float epsilon {0.05f};
+    float epsilon {0.15f};
     constexpr int startEpsilonDecaying {1};
     const int endEpsilonDecaying {episodes/2};
     float epsilonDecayValue = epsilon/(endEpsilonDecaying - startEpsilonDecaying);
@@ -97,8 +97,15 @@ void learn(
 
     constexpr int showEvery {2000};
 
-    // y pos size, angle size, action space size
-    QTable startQTable(discreteOSSize, discreteOSSize, interface.actionSpaceCount()); // get q table from file if needed
+    int yPosDiscreteOSSize {discreteOSSize};
+    int angleDiscreteOSSize {discreteOSSize};
+    int angularVelocityOSSize {discreteOSSize};
+
+    QTable startQTable(std::vector<int> {
+        yPosDiscreteOSSize,
+        angleDiscreteOSSize,
+        interface.actionSpaceCount()
+    });
 
     if(!loadQTable) {
         // init startQTable with random values
@@ -117,9 +124,8 @@ void learn(
         }
         bool done = false;
         interface.reset();
-        for(int currentStep = 0; currentStep < 600; ++currentStep) {
-
-            std::vector<float> actions {startQTable.get(discreteState.yPosition, discreteState.angle)};
+        for(int currentStep = 0; currentStep < 500; ++currentStep) {
+            std::vector<float> actions {startQTable.getRow(std::vector<int> {discreteState.yPosition, discreteState.angle})};
             int action;
             if(randomFloat() > epsilon) {
                 action = static_cast<int>(std::max_element(actions.begin(),actions.end()) - actions.begin());
@@ -137,12 +143,12 @@ void learn(
             }
             datastructs::discreteState newDiscreteState {interface.discreteState()};
             if(!done) {
-                float maxFutureQ {startQTable.maxFutureQ(newDiscreteState.yPosition, newDiscreteState.angle)};
-                float currentQ {startQTable.get(discreteState.yPosition, discreteState.angle, action)};
+                float maxFutureQ {startQTable.maxFutureQ(std::vector<int>{newDiscreteState.yPosition, newDiscreteState.angle})};
+                float currentQ {startQTable.get(std::vector<int>{discreteState.yPosition, discreteState.angle, action})};
                 float newQ {(1 - learningRate) * currentQ + learningRate * (reward + discount * maxFutureQ)};
-                startQTable.update(discreteState.yPosition, discreteState.angle, action, newQ);
+                startQTable.update(std::vector<int>{discreteState.yPosition, discreteState.angle, action}, newQ);
             } else {
-                startQTable.update(discreteState.yPosition, discreteState.angle, action, landReward);
+                startQTable.update(std::vector<int>{discreteState.yPosition, discreteState.angle, action}, landReward);
             }
             discreteState = newDiscreteState;
 

@@ -10,18 +10,17 @@
 class QTable {
 
 public:
-    explicit QTable(int x, int y, int z);
+    explicit QTable(std::vector<int> qTableDef);
     std::vector<float> qTable;
-    float& get(int x, int y, int z);
-    void update(int x, int y, int z, float value);
-    std::vector<float> get(int x, int y);
+    float& get(std::vector<int> position);
+    void update(std::vector<int> position, float value);
+    std::vector<float> getRow(std::vector<int> position);
     void randomFill();
-    float maxFutureQ(int x, int y);
+    float maxFutureQ(std::vector<int> position);
 private:
-    const int m_width;
-    const int m_height;
-    const int m_depth;
+    const std::vector<int> m_tableDef;
     float randomFloat(float min, float max);
+    int m_elementPosition(std::vector<int> position) ;
 };
 
 

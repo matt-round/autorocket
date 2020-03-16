@@ -22,7 +22,7 @@ Simulation::Simulation(const float gravity, const bool wind)
           m_world{m_gravity},
           m_worldWidth{70},
           m_worldHeight{70},
-          m_ground{m_world, static_cast<float>(m_worldWidth), -static_cast<float>(m_worldHeight)},
+          m_ground{m_world, static_cast<float>(m_worldWidth*10), -static_cast<float>(m_worldHeight)},
           m_rocket{m_world},
           m_windSpeed{0} {
 
