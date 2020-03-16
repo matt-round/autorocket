@@ -59,10 +59,17 @@ void Simulation::step() {
     float timeStep = 1.0f / 60.0f;
     int32 velocityIterations = 6;
     int32 positionIterations = 2;
-    /*if(m_wind) {
+    if(m_wind) {
         m_rocket.applyWindForce(m_windSpeed);
-    }*/
+    }
     m_world.Step(timeStep, velocityIterations, positionIterations);
+    float maxV {10.0f};
+    float minV {-10.0f};
+    if(m_rocket.getAngularVelocity() > maxV) {
+        m_rocket.setAngularVelocity(maxV);
+    } else if(m_rocket.getAngularVelocity() < minV) {
+        m_rocket.setAngularVelocity(minV);
+    }
 }
 
 std::thread* Simulation::run(QApplication &app, MainWindow &w, bool &exitFlag) {
@@ -103,8 +110,7 @@ void Simulation::m_simulation(QApplication &app, MainWindow &w, bool &exitFlag) 
         // normalisedAngle needed because angle is unbounded.
         float normalisedAngle {m_rocket.getNormalisedAngle()};
         moveRocketEvent->angle = normalisedAngle;
-        std::cout << "Angle: " << normalisedAngle << " YPos: " << m_rocket.getPos().y << " awake: " << m_rocket.isAwake() << '\n';
-
+        //std::cout << "Angle: " << normalisedAngle << " YPos: " << m_rocket.getPos().y << " awake: " << m_rocket.isAwake() << '\n';
         app.postEvent(mainWindowPtr, reinterpret_cast<QEvent*>(moveRocketEvent));
         auto finish = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = finish - start;

@@ -40,8 +40,8 @@ int randomInt(int min, int max) {
 }
 
 int main(int argc, char *argv[]) {
-    constexpr int discreteOSSize {60};
-    constexpr bool wind = false;
+    constexpr int discreteOSSize {20};
+    constexpr bool wind = true;
     Simulation sim = Simulation(-10.0f, wind);
     auto interface = Interface(sim, discreteOSSize);
 
@@ -86,8 +86,8 @@ void learn(
 
     constexpr float learningRate {0.1f};
     constexpr float discount {0.95f};
-    constexpr int episodes {10000};
-    float epsilon {0.15f};
+    constexpr int episodes {40000};
+    float epsilon {0.10f};
     constexpr int startEpsilonDecaying {1};
     const int endEpsilonDecaying {episodes/2};
     float epsilonDecayValue = epsilon/(endEpsilonDecaying - startEpsilonDecaying);
@@ -104,6 +104,7 @@ void learn(
     QTable startQTable(std::vector<int> {
         yPosDiscreteOSSize,
         angleDiscreteOSSize,
+        angularVelocityOSSize,
         interface.actionSpaceCount()
     });
 
@@ -124,8 +125,8 @@ void learn(
         }
         bool done = false;
         interface.reset();
-        for(int currentStep = 0; currentStep < 500; ++currentStep) {
-            std::vector<float> actions {startQTable.getRow(std::vector<int> {discreteState.yPosition, discreteState.angle})};
+        for(int currentStep = 0; currentStep < 600; ++currentStep) {
+            std::vector<float> actions {startQTable.getRow(std::vector<int> {discreteState.yPosition, discreteState.angle, discreteState.angularVelocity})};
             int action;
             if(randomFloat() > epsilon) {
                 action = static_cast<int>(std::max_element(actions.begin(),actions.end()) - actions.begin());
@@ -143,17 +144,15 @@ void learn(
             }
             datastructs::discreteState newDiscreteState {interface.discreteState()};
             if(!done) {
-                float maxFutureQ {startQTable.maxFutureQ(std::vector<int>{newDiscreteState.yPosition, newDiscreteState.angle})};
-                float currentQ {startQTable.get(std::vector<int>{discreteState.yPosition, discreteState.angle, action})};
+                float maxFutureQ {startQTable.maxFutureQ(std::vector<int>{newDiscreteState.yPosition, newDiscreteState.angle, newDiscreteState.angularVelocity})};
+                float currentQ {startQTable.get(std::vector<int>{discreteState.yPosition, discreteState.angle, discreteState.angularVelocity, action})};
                 float newQ {(1 - learningRate) * currentQ + learningRate * (reward + discount * maxFutureQ)};
-                startQTable.update(std::vector<int>{discreteState.yPosition, discreteState.angle, action}, newQ);
+                startQTable.update(std::vector<int>{discreteState.yPosition, discreteState.angle, discreteState.angularVelocity, action}, newQ);
             } else {
-                startQTable.update(std::vector<int>{discreteState.yPosition, discreteState.angle, action}, landReward);
+                startQTable.update(std::vector<int>{discreteState.yPosition, discreteState.angle, discreteState.angularVelocity, action}, landReward);
             }
             discreteState = newDiscreteState;
-
         }
-
 
         if(done) {
             std::cout << "It landed on " << episode << '\n';

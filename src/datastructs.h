@@ -9,10 +9,12 @@ namespace datastructs {
     struct state {
         float yPosition;
         float angle;
+        float angularVelocity;
     };
     struct discreteState {
         int yPosition;
         int angle;
+        int angularVelocity;
     };
 }
 

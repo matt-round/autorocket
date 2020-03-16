@@ -11,7 +11,8 @@ Interface::Interface(Simulation &sim, float discreteOSSize) :
                 // position
                 (std::get<0>(observationSpaceHigh()) - std::get<0>(observationSpaceLow())) / discreteOSSize,
                 // angle
-                (std::get<1>(observationSpaceHigh()) - std::get<1>(observationSpaceLow())) / discreteOSSize
+                (std::get<1>(observationSpaceHigh()) - std::get<1>(observationSpaceLow())) / discreteOSSize,
+                (std::get<2>(observationSpaceHigh()) - std::get<2>(observationSpaceLow())) / discreteOSSize
         } {
 
 
@@ -35,9 +36,11 @@ void Interface::reset() {
 
 datastructs::state Interface::state() {
     PhysicsRocket rocket {m_sim.getRocket()};
-    const float &posY {rocket.getPos().y};
-    const float &angle {rocket.getNormalisedAngle()};
-    return datastructs::state {posY, angle};
+    float posY {rocket.getPos().y};
+    float angle {rocket.getNormalisedAngle()};
+    float angularVelocity {rocket.getAngularVelocity()};
+
+    return datastructs::state {posY, angle, angularVelocity};
 }
 
 datastructs::discreteState Interface::discreteState() {
@@ -49,7 +52,10 @@ datastructs::discreteState Interface::discreteState() {
     int angleNormalised {
             static_cast<int>((oldState.angle - std::get<1>(observationSpaceLow())) / m_discreteOSWinSize[1])
     };
-    return datastructs::discreteState {yPosNormalised, angleNormalised};
+    int angularVelocityNormalised {
+            static_cast<int>((oldState.angularVelocity - std::get<2>(observationSpaceLow())) / m_discreteOSWinSize[2])
+    };
+    return datastructs::discreteState {yPosNormalised, angleNormalised, angularVelocityNormalised};
 }
 
 float Interface::reward() {
@@ -65,12 +71,12 @@ float Interface::reward() {
     return reward;
 }
 
-std::tuple<float, float> Interface::observationSpaceHigh() {
-    return std::make_tuple(0.0f, M_PI*2);
+std::tuple<float, float, float> Interface::observationSpaceHigh() {
+    return std::make_tuple(0.0f, M_PI*2, 10.0f);
 }
 
-std::tuple<float, float> Interface::observationSpaceLow() {
-    return std::make_tuple(-70.0f, -(M_PI*2));
+std::tuple<float, float, float> Interface::observationSpaceLow() {
+    return std::make_tuple(-70.0f, -(M_PI*2), -10.0f);
 }
 
 int Interface::actionSpaceCount() {

@@ -26,6 +26,8 @@ public:
     void applyThrust();
     bool isAwake();
     void reset();
+    float getAngularVelocity();
+    void setAngularVelocity(float v);
 
 private:
     b2World& m_world;

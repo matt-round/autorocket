@@ -35,7 +35,8 @@ std::vector<float> QTable::getRow(std::vector<int> position) {
     position.push_back(0); // set position in last dimension to 0.
     int firstElementPositionInMemory {m_elementPosition(position)};
     std::vector<float> row;
-    for(int i = 0; i < m_tableDef.back(); ++i) {
+    row.reserve(m_tableDef.back());
+for(int i = 0; i < m_tableDef.back(); ++i) {
         row.push_back(qTable.at(firstElementPositionInMemory+i));
     }
     return row;

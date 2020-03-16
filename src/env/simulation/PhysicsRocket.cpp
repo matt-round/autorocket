@@ -45,6 +45,14 @@ float PhysicsRocket::getNormalisedAngle() {
     return std::fmod(m_body->GetAngle(), static_cast<float>(2*M_PI));
 }
 
+float PhysicsRocket::getAngularVelocity() {
+    return m_body->GetAngularVelocity();
+}
+
+void PhysicsRocket::setAngularVelocity(float v) {
+    m_body->SetAngularVelocity(v);
+}
+
 void PhysicsRocket::applyWindForce(float windSpeed) {
     m_body->ApplyForceToCenter(b2Vec2(windSpeed,0), false);
 }

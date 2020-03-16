@@ -19,15 +19,15 @@ public:
     datastructs::state state();
     datastructs::discreteState discreteState();
     float reward();
-    std::tuple<float, float> observationSpaceHigh();
-    std::tuple<float, float> observationSpaceLow();
+    std::tuple<float, float, float> observationSpaceHigh();
+    std::tuple<float, float, float> observationSpaceLow();
     int actionSpaceCount();
     void step(int action);
 
 
 private:
     Simulation& m_sim;
-    const std::array<float, 2> m_discreteOSWinSize;
+    const std::array<float, 3> m_discreteOSWinSize;
 };
 
 
