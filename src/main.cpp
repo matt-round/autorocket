@@ -1,5 +1,6 @@
 // std includes
 #include <iostream>
+#include <fstream>
 #include <string>
 // Qt includes
 #include <QApplication>
@@ -9,6 +10,8 @@
 #include "QTable.h"
 #include <thread>
 #include <chrono>
+
+using std::ofstream;
 
 int game(int argc, char *argv[]);
 
@@ -86,7 +89,7 @@ void learn(
 
     constexpr float learningRate {0.1f};
     constexpr float discount {0.95f};
-    constexpr int episodes {1000000};
+    constexpr int episodes {100};
     float epsilon {0.20f};
     constexpr int startEpsilonDecaying {1};
     const int endEpsilonDecaying {episodes/2};
@@ -94,6 +97,8 @@ void learn(
     constexpr int movePenalty {1};
     constexpr int crashPenalty {300};
     constexpr int landReward {10};
+    
+    std::vector<std::string> log;
 
     constexpr int showEvery {100000};
 
@@ -112,7 +117,12 @@ void learn(
         interface.actionSpaceCount()
     });
 
-    if(!loadQTable) {
+    if(loadQTable) {
+        startQTable.randomFill();
+        startQTable.loadFromFile("QTable.rslr");
+        startQTable.printQTable();
+        std::cout << "QTable loaded" << std::endl;
+    } else {
         // init startQTable with random values
         startQTable.randomFill();
     }
@@ -172,14 +182,29 @@ void learn(
 
         if(done) {
             std::cout << "It landed on " << episode << '\n';
+            log.push_back("It landed on episode: " + std::to_string(episode));
         } else if(episode % 200 == 0) {
             std::cout << "Episode: " << episode << '\n';
+            log.push_back("Episode: " + std::to_string(episode));
         }
 
         if(endEpsilonDecaying >= episode >= startEpsilonDecaying) {
             epsilon -= epsilonDecayValue;
         }
     }
+    
+    ofstream outLogFile;
+    
+    outLogFile.open("log.txt", std::ofstream::out | std::ofstream::trunc);
+    
+    for(std::string &row : log) {
+        outLogFile << row << '\n';
+    }
+    outLogFile.close();
+    
+    startQTable.saveToFile("QTable.rslr");
+    std::cout << "QTable saved" << std::endl;
+    
 }
 
 int game(int argc, char *argv[]) {

@@ -5,6 +5,10 @@
 #include <iostream>
 #include <utility>
 #include "QTable.h"
+#include<fstream>
+
+using std::ofstream;
+using std::ifstream;
 
 QTable::QTable(std::vector<int> qTableDef) :
     m_tableDef{std::move(qTableDef)} {
@@ -12,7 +16,8 @@ QTable::QTable(std::vector<int> qTableDef) :
     for(int dimensionSize : m_tableDef) {
         tableSize *= dimensionSize;
     }
-    qTable.resize(tableSize);
+        qTable = std::unique_ptr<std::vector<float>>(new std::vector<float>);
+    qTable->resize(tableSize);
 }
 
 int QTable::m_elementPosition(std::vector<int> position) {
@@ -24,11 +29,11 @@ int QTable::m_elementPosition(std::vector<int> position) {
 }
 
 float& QTable::get(std::vector<int> position) {
-    return qTable.at(m_elementPosition(std::move(position)));
+    return qTable->at(m_elementPosition(std::move(position)));
 }
 
 void QTable::update(std::vector<int> position, float value) {
-    qTable[m_elementPosition(std::move(position))] = value;
+    qTable->at(m_elementPosition(std::move(position))) = value;
 }
 
 std::vector<float> QTable::getRow(std::vector<int> position) {
@@ -37,7 +42,7 @@ std::vector<float> QTable::getRow(std::vector<int> position) {
     std::vector<float> row;
     row.reserve(m_tableDef.back());
 for(int i = 0; i < m_tableDef.back(); ++i) {
-        row.push_back(qTable.at(firstElementPositionInMemory+i));
+        row.push_back(qTable->at(firstElementPositionInMemory+i));
     }
     return row;
 }
@@ -45,21 +50,57 @@ for(int i = 0; i < m_tableDef.back(); ++i) {
 float QTable::maxFutureQ(std::vector<int> position) {
     position.push_back(0); // set position in last dimension to 0.
     int firstElementPositionInMemory {m_elementPosition(position)};
-    float max {qTable.at(firstElementPositionInMemory)};
+    float max {qTable->at(firstElementPositionInMemory)};
     for(int i = 0; i < m_tableDef.back(); ++i) {
-        float &currentValueToCompare {qTable.at(firstElementPositionInMemory+i)};
+        float &currentValueToCompare {qTable->at(firstElementPositionInMemory+i)};
         if(currentValueToCompare > max) max = currentValueToCompare;
     }
     return max;
 }
 
 void QTable::randomFill() {
-    for(auto &v : qTable) {
+    for(auto &v : *qTable) {
         v = randomFloat(-6.0f, 0);
     }
 }
 
 float QTable::randomFloat(float min, float max) {
     return min + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(max-min)));
+}
+
+void QTable::saveToFile(std::string path) {
+    ofstream wf(path, std::ios::out | std::ios::binary | std::ios::trunc);
+    if(!wf) {
+       std::cout << "Cannot open file!" << std::endl;
+    }
+    std::cout << "Capacity: " << qTable->size() * sizeof(float) << std::endl;
+    for(float &v : *qTable) {
+        wf.write((char *) &v, sizeof(float));
+    }
+    wf.close();
+    if(!wf.good()) {
+       std::cout << "Error occurred at writing time!" << std::endl;
+    }
+}
+
+void QTable::loadFromFile(std::string path) {
+   ifstream rf(path, std::ios::out | std::ios::binary);
+    if(!rf) {
+       std::cout << "Cannot open file!" << std::endl;
+    }
+    std::cout << "Capacity: " << qTable->size() * sizeof(float) << std::endl;
+    for(float &v : *qTable) {
+        rf.read((char *) &v, sizeof(float));
+    }
+    rf.close();
+    if(!rf.good()) {
+       std::cout << "Error occurred at reading time!" << std::endl;
+    }
+}
+
+void QTable::printQTable() {
+    for(int i = 0; i < 10; ++i) {
+        std::cout << qTable->at(i) << '\n';
+    }
 }
 

@@ -11,12 +11,15 @@ class QTable {
 
 public:
     explicit QTable(std::vector<int> qTableDef);
-    std::vector<float> qTable;
+    std::unique_ptr<std::vector<float>> qTable;
     float& get(std::vector<int> position);
     void update(std::vector<int> position, float value);
     std::vector<float> getRow(std::vector<int> position);
     void randomFill();
     float maxFutureQ(std::vector<int> position);
+    void saveToFile(std::string path);
+    void loadFromFile(std::string path);
+    void printQTable();
 private:
     const std::vector<int> m_tableDef;
     float randomFloat(float min, float max);
