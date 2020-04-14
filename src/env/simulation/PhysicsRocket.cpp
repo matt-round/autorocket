@@ -45,6 +45,11 @@ float PhysicsRocket::getNormalisedAngle() {
     return std::fmod(m_body->GetAngle(), static_cast<float>(2*M_PI));
 }
 
+float PhysicsRocket::getLinearVelocity() {
+    return m_body->GetLinearVelocity().y;
+}
+
+
 float PhysicsRocket::getAngularVelocity() {
     return m_body->GetAngularVelocity();
 }
@@ -66,7 +71,7 @@ void PhysicsRocket::applyForceRight() {
 }
 
 void PhysicsRocket::applyThrust() {
-    float magnitude = 500;
+    float magnitude = 100;
     b2Vec2 forceDirection = m_body->GetWorldVector( b2Vec2(0,1) );
     forceDirection = magnitude * forceDirection;
     m_body->ApplyForce(forceDirection, m_body->GetPosition(), true);

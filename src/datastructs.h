@@ -7,13 +7,17 @@
 
 namespace datastructs {
     struct state {
+        float xPosition;
         float yPosition;
         float angle;
+        float linearVelocity;
         float angularVelocity;
     };
     struct discreteState {
+        int xPosition;
         int yPosition;
         int angle;
+        int linearVelocity;
         int angularVelocity;
     };
 }

@@ -57,3 +57,14 @@ compile_commands.json
 
 # mac
 .DS_Store
+
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Debug/
+Rslr.build/
+Rslr.xcodeproj/
+cmake_install.cmake
+cmake-build-release/
+cmake-build-debug/
+build-dir/

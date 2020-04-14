@@ -86,8 +86,8 @@ void learn(
 
     constexpr float learningRate {0.1f};
     constexpr float discount {0.95f};
-    constexpr int episodes {40000};
-    float epsilon {0.10f};
+    constexpr int episodes {1000000};
+    float epsilon {0.20f};
     constexpr int startEpsilonDecaying {1};
     const int endEpsilonDecaying {episodes/2};
     float epsilonDecayValue = epsilon/(endEpsilonDecaying - startEpsilonDecaying);
@@ -95,15 +95,19 @@ void learn(
     constexpr int crashPenalty {300};
     constexpr int landReward {10};
 
-    constexpr int showEvery {2000};
+    constexpr int showEvery {100000};
 
+    int xPosDiscreteOSSize {discreteOSSize};
     int yPosDiscreteOSSize {discreteOSSize};
     int angleDiscreteOSSize {discreteOSSize};
+    int linearVelocityOSSize {discreteOSSize};
     int angularVelocityOSSize {discreteOSSize};
 
     QTable startQTable(std::vector<int> {
+        xPosDiscreteOSSize,
         yPosDiscreteOSSize,
         angleDiscreteOSSize,
+        linearVelocityOSSize,
         angularVelocityOSSize,
         interface.actionSpaceCount()
     });
@@ -126,7 +130,19 @@ void learn(
         bool done = false;
         interface.reset();
         for(int currentStep = 0; currentStep < 600; ++currentStep) {
-            std::vector<float> actions {startQTable.getRow(std::vector<int> {discreteState.yPosition, discreteState.angle, discreteState.angularVelocity})};
+
+            std::vector<float> actions{
+                    startQTable.getRow(
+                            std::vector<int>{
+                                    discreteState.xPosition,
+                                    discreteState.yPosition,
+                                    discreteState.angle,
+                                    discreteState.linearVelocity,
+                                    discreteState.angularVelocity
+                            }
+                    )
+            };
+
             int action;
             if(randomFloat() > epsilon) {
                 action = static_cast<int>(std::max_element(actions.begin(),actions.end()) - actions.begin());
@@ -144,18 +160,20 @@ void learn(
             }
             datastructs::discreteState newDiscreteState {interface.discreteState()};
             if(!done) {
-                float maxFutureQ {startQTable.maxFutureQ(std::vector<int>{newDiscreteState.yPosition, newDiscreteState.angle, newDiscreteState.angularVelocity})};
-                float currentQ {startQTable.get(std::vector<int>{discreteState.yPosition, discreteState.angle, discreteState.angularVelocity, action})};
+                float maxFutureQ {startQTable.maxFutureQ(std::vector<int>{newDiscreteState.xPosition, newDiscreteState.yPosition, newDiscreteState.angle, newDiscreteState.linearVelocity, newDiscreteState.angularVelocity})};
+                float currentQ {startQTable.get(std::vector<int>{discreteState.xPosition, discreteState.yPosition, discreteState.angle, discreteState.linearVelocity, discreteState.angularVelocity, action})};
                 float newQ {(1 - learningRate) * currentQ + learningRate * (reward + discount * maxFutureQ)};
-                startQTable.update(std::vector<int>{discreteState.yPosition, discreteState.angle, discreteState.angularVelocity, action}, newQ);
+                startQTable.update(std::vector<int>{discreteState.xPosition, discreteState.yPosition, discreteState.angle, discreteState.linearVelocity, discreteState.angularVelocity, action}, newQ);
             } else {
-                startQTable.update(std::vector<int>{discreteState.yPosition, discreteState.angle, discreteState.angularVelocity, action}, landReward);
+                startQTable.update(std::vector<int>{discreteState.xPosition, discreteState.yPosition, discreteState.angle, discreteState.linearVelocity, discreteState.angularVelocity, action}, landReward);
             }
             discreteState = newDiscreteState;
         }
 
         if(done) {
             std::cout << "It landed on " << episode << '\n';
+        } else if(episode % 200 == 0) {
+            std::cout << "Episode: " << episode << '\n';
         }
 
         if(endEpsilonDecaying >= episode >= startEpsilonDecaying) {

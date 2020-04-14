@@ -26,6 +26,7 @@ public:
     void applyThrust();
     bool isAwake();
     void reset();
+    float getLinearVelocity();
     float getAngularVelocity();
     void setAngularVelocity(float v);
 
